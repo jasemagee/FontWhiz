@@ -1,6 +1,8 @@
 using System;
 using System.Drawing;
 using System.Collections.Generic;
+using System.IO;
+using System.Diagnostics;
 
 namespace FontWhiz
 {
@@ -53,7 +55,7 @@ namespace FontWhiz
 			BackgroundColour = backgroundColour;
 
 			ShowGrid = true;
-			AsciiSetSize = 255;
+			AsciiSetSize = 256;
 			ColumnCount = 16;
 
 			Chars = new char[AsciiSetSize];
@@ -123,67 +125,58 @@ namespace FontWhiz
 
 		public void Render (Bitmap bitmap)
 		{
-			using (Graphics graphics = Graphics.FromImage (bitmap)) {
+			if (Directory.Exists ("work"))
+				Directory.Delete ("work", true);
 
-				graphics.Clear (BackgroundColour); // <-- Changing Color.White works just fine!
-				graphics.Flush ();
+			DirectoryInfo outDirectory = Directory.CreateDirectory ("work");
 
-//				graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SingleBitPerPixel;
-//				graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.None;
-//				graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.Low;
-//				graphics.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighSpeed;
+			BackgroundColour = Color.AliceBlue;
+			string background = BackgroundColour == Color.Transparent ? "transparent" : '\'' + BackgroundColour.ToImageMagickRgb () + '\'';
 
-//				graphics.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
-//				graphics.CompositingMode  = System.Drawing.Drawing2D.CompositingMode.SourceOver;
+			// TODO: Background would be more consistent but it doesn't want to work?
+			Process.Start ("convert", string.Format ("-size {0}x{0} xc:{1} work/blank.png", CellSize, background));
 
-				var path = new System.Drawing.Drawing2D.GraphicsPath ();
-				SolidBrush brush = new SolidBrush (FontColour);
+			string defaultArgs = string.Format ("-gravity center +antialias -size {0}x{0} -background {1} -fill '{2}' -font Helvetica -pointsize {3}",
+			                                    CellSize, background, FontColour.ToImageMagickRgb (), Font.Size);
 
+			foreach (char c in Chars) {
+				// Only bother to make files for actual visible characters
+				if (char.IsControl (c))
+					continue;
 
-				int row = 0;
-				int col = 0;
-				foreach (char c in Chars) {
-//					graphics.DrawString ("A", 
-//					               Font,
-//					               new SolidBrush (FontColour), 
-//					               new PointF (row * CellSize, col * CellSize));
-//
-//					graphics.Flush ();
+				string outputChar = char.ToString (c);
 
-					path.AddString (char.ToString (c),
-					               new FontFamily (Font.FontFamily.Name),
-					               (int)Font.Style, graphics.DpiY * Font.Size / 72,					              
-					               new PointF (row * CellSize, col * CellSize),
-					               new StringFormat ());
+				if (outputChar.Equals ("'"))
+					outputChar += "\'";
 
-					//path.AddString (
-					//	new PointF (width - CellSize, height - CellSize));
-					path.CloseFigure ();
-					//graphics.Flush ();
+				if (outputChar.Equals ("\\"))
+					outputChar += "\\";
 
-					row++;
-					if (row >= 16) {
-						col++;
-						row = 0;
-					}
-				}
-
-				float width = graphics.VisibleClipBounds.Width - 1;
-				float height = graphics.VisibleClipBounds.Height - 1;
-
-
-				path.AddString ("A",
-					               new FontFamily (Font.FontFamily.Name),
-					               (int)Font.Style, graphics.DpiY * Font.Size / 72,					              
-					               new PointF (width - 24, height - 24),
-					               new StringFormat ());
-
-				graphics.FillPath (brush, path);
-
-				RenderGrid (graphics);
-
-				graphics.Flush ();
+			
+				string args = string.Format ("label:'{0}' work/{1}.png", outputChar, (int)c);
+				Process.Start ("convert", defaultArgs + " " + args);
 			}
+
+			//FileInfo[] files = outDirectory.GetFiles ();
+			string[] filenames = new string[AsciiSetSize];
+			for (int i = 0; i < AsciiSetSize; i++) {
+				filenames [i] = "work/blank.png";
+				FileInfo[] matches = outDirectory.GetFiles (string.Format ("{0}.png", i));
+				if (matches.Length > 0)
+					filenames [i] = "work/" + matches [0].Name;
+			}
+
+			string joinedFilenames = string.Join (" ", filenames);
+			string montageArgs = string.Format ("{0} +set label '' -geometry {1}x{1}+0+0 work/output.png",
+			                                    joinedFilenames, CellSize);
+
+			Process.Start ("montage", montageArgs);
+
+//
+//				RenderGrid (graphics);
+//
+//				graphics.Flush ();
+//			}
 		}
 	}
 }

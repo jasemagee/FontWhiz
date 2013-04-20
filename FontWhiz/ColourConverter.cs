@@ -20,6 +20,14 @@ namespace FontWhiz
 			                      gdkColour.Green,
 			                      gdkColour.Blue);
 		}
+
+		public static string ToImageMagickRgb (this Color colour)
+		{
+			return string.Format ("rgb({0},{1},{2})",
+			                     colour.R,
+			                     colour.G,
+			                     colour.B);
+		}
 	}
 }
 
