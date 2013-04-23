@@ -8,9 +8,19 @@ namespace FontWhiz
 {
 	public class FontTableRenderer
 	{
-		public Font Font {
+		public string FontName {
 			get;
-			private set;
+			set;
+		}
+
+		public int FontSize {
+			get;
+			set;
+		}
+
+		public bool FontAntiAlias {
+			get;
+			set;
 		}
 
 		public int AsciiSetSize {
@@ -38,23 +48,19 @@ namespace FontWhiz
 			set;
 		}
 
-		public bool ShowGrid {
-			get;
-			set;
-		}
-
 		public float CellSize {
 			get;
 			private set;
 		}
 
-		public FontTableRenderer (Font font, Color fontColour, Color backgroundColour)
+		public FontTableRenderer (string fontName, int fontSize, bool fontAntiAlias, Color fontColour, Color backgroundColour)
 		{
-			Font = font;
+			FontName = fontName;
+			FontSize = fontSize;	
+			FontAntiAlias = fontAntiAlias;
 			FontColour = fontColour;
 			BackgroundColour = backgroundColour;
 
-			ShowGrid = true;
 			AsciiSetSize = 256;
 			ColumnCount = 16;
 
@@ -67,117 +73,132 @@ namespace FontWhiz
 				if (char.IsControl (Chars [i]))
 					Chars [i] = ' ';
 			}
-
-			using (Bitmap bitmap = new Bitmap(1,1)) {
-				using (Graphics graphics =  Graphics.FromImage(bitmap)) {
-					foreach (char c in Chars) {
-						SizeF charSize = graphics.MeasureString (char.ToString (c), Font);
-						CellSize = Math.Max (CellSize, charSize.Width);
-						CellSize = Math.Max (CellSize, charSize.Height);
-					}
-				}
-			}
-
 		}
 
-		private void RenderGrid (Graphics graphics)
+		private void ProcessStartAndWaitForExit (string filename, string args)
 		{
-			if (!ShowGrid)
-				return;
-
-			Pen pen = new Pen (FontColour);
-
-			float width = graphics.VisibleClipBounds.Width - 1;
-			float height = graphics.VisibleClipBounds.Height - 1;
-
-			PointF topLeft = new PointF (0, 0);
-			PointF topRight = new PointF (width, 0);
-			PointF bottomLeft = new PointF (0, height);
-			PointF bottomRight = new PointF (width, height);
-
-			//  __
-			// |
-			graphics.DrawLine (pen, topLeft, topRight);
-			graphics.DrawLine (pen, topLeft, bottomLeft);
-  
-			// __|
-			graphics.DrawLine (pen, bottomRight, bottomLeft);
-			graphics.DrawLine (pen, bottomRight, topRight);
-
-			for (int i = 0; i < ColumnCount; i++) {
-				graphics.DrawLine (pen, 
-				                   new PointF (i * CellSize, 0), 
-				                   new PointF (i * CellSize, height));
-			}
-
-			int row = 0;
-			foreach (char c in Chars) {
-				graphics.DrawLine (pen,
-				                   new PointF (0, row * CellSize),
-				                   new PointF (width, row * CellSize));
-
-				row++;
-				if (row >= 16)
-					row = 0;
-
+			using (Process p = new Process ()) {
+				p.StartInfo.FileName = filename;
+				p.StartInfo.Arguments = args;
+				p.StartInfo.UseShellExecute = false;
+				p.Start ();
+				p.WaitForExit ();
 			}
 		}
 
-		public void Render (Bitmap bitmap)
+		private string GetImageMagickSafeChar (char c)
 		{
-			if (Directory.Exists ("work"))
-				Directory.Delete ("work", true);
+			string outputChar = char.ToString (c);
 
-			DirectoryInfo outDirectory = Directory.CreateDirectory ("work");
+			if (outputChar.Equals ("'"))
+				outputChar += "\'";
 
-			BackgroundColour = Color.AliceBlue;
-			string background = BackgroundColour == Color.Transparent ? "transparent" : '\'' + BackgroundColour.ToImageMagickRgb () + '\'';
+			if (outputChar.Equals ("\\"))
+				outputChar += "\\";
 
-			// TODO: Background would be more consistent but it doesn't want to work?
-			Process.Start ("convert", string.Format ("-size {0}x{0} xc:{1} work/blank.png", CellSize, background));
+			return outputChar;
 
-			string defaultArgs = string.Format ("-gravity center +antialias -size {0}x{0} -background {1} -fill '{2}' -font Helvetica -pointsize {3}",
-			                                    CellSize, background, FontColour.ToImageMagickRgb (), Font.Size);
+		}
+
+		private void CalculateCellSize (DirectoryInfo directory)
+		{
+			var defaultArgs = string.Format ("-gravity center +antialias -font {0} -pointsize {1}", FontName, FontSize);
 
 			foreach (char c in Chars) {
 				// Only bother to make files for actual visible characters
 				if (char.IsControl (c))
 					continue;
 
-				string outputChar = char.ToString (c);
+				string outputChar = GetImageMagickSafeChar (c);
 
-				if (outputChar.Equals ("'"))
-					outputChar += "\'";
-
-				if (outputChar.Equals ("\\"))
-					outputChar += "\\";
-
-			
-				string args = string.Format ("label:'{0}' work/{1}.png", outputChar, (int)c);
-				Process.Start ("convert", defaultArgs + " " + args);
+				string args = string.Format ("{0} label:'{1}' work/{2}.png", defaultArgs, outputChar, (int)c);	
+				ProcessStartAndWaitForExit ("convert", args);
 			}
 
-			//FileInfo[] files = outDirectory.GetFiles ();
+			foreach (var file in directory.GetFiles()) {
+				Image image = Image.FromFile (file.FullName);
+				CellSize = Math.Max (CellSize, image.Width);
+				CellSize = Math.Max (CellSize, image.Height);
+				file.Delete ();
+			}
+		}
+
+		public string Render ()
+		{
+			if (Directory.Exists ("work"))
+				Directory.Delete ("work", true);
+
+			DirectoryInfo outDirectory = Directory.CreateDirectory ("work");
+
+			CalculateCellSize (outDirectory);
+
+			string background = BackgroundColour.ToImageMagickRgb ();
+
+			// TODO: Background would be more consistent but it doesn't want to work?
+			ProcessStartAndWaitForExit ("convert", string.Format ("-size {0}x{0} xc:{1} work/blank.png", CellSize, background));
+
+			var defaultArgs = string.Format (
+				"-gravity center +antialias -size {0}x{0} -background {1} -fill '{2}' -font {3} -pointsize {4}",
+				CellSize, background, FontColour.ToImageMagickRgb (), FontName, FontSize);
+
+			foreach (char c in Chars) {
+				// Only bother to make files for actual visible characters
+				if (char.IsControl (c))
+					continue;
+
+				string outputChar = GetImageMagickSafeChar (c);
+
+				var args = string.Format ("{0} label:'{1}' work/{2}.png", defaultArgs, outputChar, (int)c);
+				ProcessStartAndWaitForExit ("convert", args);
+			}
+
+
 			string[] filenames = new string[AsciiSetSize];
 			for (int i = 0; i < AsciiSetSize; i++) {
 				filenames [i] = "work/blank.png";
 				FileInfo[] matches = outDirectory.GetFiles (string.Format ("{0}.png", i));
 				if (matches.Length > 0)
-					filenames [i] = "work/" + matches [0].Name;
+					filenames [i] = matches [0].FullName;
 			}
 
-			string joinedFilenames = string.Join (" ", filenames);
-			string montageArgs = string.Format ("{0} +set label '' -geometry {1}x{1}+0+0 work/output.png",
-			                                    joinedFilenames, CellSize);
+			//int border = ShowGrid ? 1 : 0;
+			var joinedFilenames = string.Join (" ", filenames);
+			var montageArgs = string.Format (
+				"{0} +set label '' -geometry +0+0 -background none -bordercolor none work/output.png",
+				joinedFilenames, CellSize, background);
 
-			Process.Start ("montage", montageArgs);
+			ProcessStartAndWaitForExit ("montage", montageArgs);
 
-//
-//				RenderGrid (graphics);
-//
-//				graphics.Flush ();
-//			}
+			return "work/output.png";
 		}
+
+		public static List<string> GetImageMagickFonts ()
+		{
+			var p = new Process ();
+			p.StartInfo.UseShellExecute = false;
+			p.StartInfo.RedirectStandardOutput = true;
+			p.StartInfo.FileName = "convert";
+			p.StartInfo.Arguments = "-list font";
+			p.Start ();
+
+			string output = p.StandardOutput.ReadToEnd ();
+			p.WaitForExit ();
+
+			const string IMAGE_MAGICK_FONT_DEF = "Font: ";
+
+			string[] outputLines = output.Split ('\n');
+			List<string> fonts = new List<string> ();
+			foreach (string line in outputLines) {
+				if (line.Contains (IMAGE_MAGICK_FONT_DEF)) {
+					int fontStartIndex = line.LastIndexOf (IMAGE_MAGICK_FONT_DEF) + IMAGE_MAGICK_FONT_DEF.Length;
+					string fontName = line.Substring (fontStartIndex);
+					fonts.Add (fontName);
+				}
+			}
+
+			return fonts;
+		}
+
 	}
 }
 

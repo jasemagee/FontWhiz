@@ -14,46 +14,58 @@ public partial class MainWindow: Gtk.Window
 		Build ();
 
 		/// GUI designer appears to hate me and keeps forgetting these
-		fontbutton.FontSet += InstalledFontSet;
-		fontfilechooserbutton.SelectionChanged += FromFileSelectionChanged;
 		installedfontsradiobutton.Toggled += OnInputFontTypeGroupToggled;
 		generatebutton.Released += OnGenerateButtonReleased;
 
-		RefreshPreview ();
+		transparentbackgroundcheckbutton.Toggled += 
+			(sender, e) => backgroundcolorbutton.Sensitive = !transparentbackgroundcheckbutton.Active;
+
+		previewbutton.Clicked += 
+			(sender, e) => RefreshPreview ();
+
+		foreach (var font in FontTableRenderer.GetImageMagickFonts()) 
+			installedfontscombobox.AppendText (font);
+
+		installedfontscombobox.Active = 0;
 	}
 
 	private void RefreshPreview ()
 	{
-		Font font = null;
-		if (installedfontsradiobutton.Active) 
-			font = FontResolver.FromName (fontbutton.FontName);
-		else 
-			font = FontResolver.FromFilename (fontfilechooserbutton.Filename, (int)sizespinbutton.Value);
+		this.GdkWindow.Cursor = new Gdk.Cursor (Gdk.CursorType.Watch);
+		try {
+	
+			string font = string.Empty;
+			if (installedfontsradiobutton.Active) 
+				font = installedfontscombobox.ActiveText;
+			else 
+				font = fontfilechooserbutton.Filename;
 
-		if (font == null)
-			return;
+			if (string.IsNullOrEmpty (font))
+				return;
 
-		Color backgroundColour = backgroundcolorbutton.Color.ToDotNetColour ();
+			Color backgroundColour = backgroundcolorbutton.Color.ToDotNetColour ();
 
-		if (transparentbackgroundcheckbutton.Active)
-			backgroundColour = Color.Transparent;
+			if (transparentbackgroundcheckbutton.Active)
+				backgroundColour = Color.Transparent;
 
-		Color fontColour = fontcolorbutton.Color.ToDotNetColour ();
-
-
-		var tableRenderer = new FontTableRenderer (font, fontColour, backgroundColour);
-
-		var bitmap = new Bitmap ((int)(tableRenderer.CellSize * tableRenderer.ColumnCount), 
-		                         (int)(tableRenderer.CellSize * tableRenderer.ColumnCount));
+			Color fontColour = fontcolorbutton.Color.ToDotNetColour ();
 
 
-		tableRenderer.Render (bitmap);
+			var tableRenderer = new FontTableRenderer (font, sizespinbutton.ValueAsInt, antialiasingcheckbutton.Active, fontColour, backgroundColour);
 
-		using (MemoryStream memoryStream = new MemoryStream()) {
-			bitmap.Save (memoryStream, ImageFormat.Png);
-			memoryStream.Position = 0;
-			Gdk.Pixbuf pixbuf = new Gdk.Pixbuf (memoryStream);
-			previewimage.Pixbuf = pixbuf;
+
+			string preview = tableRenderer.Render ();
+
+//		using (MemoryStream memoryStream = new MemoryStream()) {
+//			bitmap.Save (memoryStream, ImageFormat.Png);
+//			memoryStream.Position = 0;
+//			Gdk.Pixbuf pixbuf = new Gdk.Pixbuf (memoryStream);
+//			previewimage.Pixbuf = pixbuf;
+//		}
+
+			previewimage.File = preview;
+		} finally {
+			this.GdkWindow.Cursor = new Gdk.Cursor (Gdk.CursorType.Arrow);
 		}
 	}
 	
@@ -66,34 +78,6 @@ public partial class MainWindow: Gtk.Window
 	{
 		if (string.IsNullOrEmpty (outputfilechooserbutton.Filename))
 			return;
-
-		Font font = null;
-		if (installedfontsradiobutton.Active) 
-			font = FontResolver.FromName (fontbutton.FontName);
-		else 
-			font = FontResolver.FromFilename (fontfilechooserbutton.Filename, (int)sizespinbutton.Value);
-
-		if (font == null)
-			return;
-
-		Color backgroundColour = backgroundcolorbutton.Color.ToDotNetColour ();
-
-		if (transparentbackgroundcheckbutton.Active)
-			backgroundColour = Color.Transparent;
-
-		Color fontColour = fontcolorbutton.Color.ToDotNetColour ();
-
-
-		var tableRenderer = new FontTableRenderer (font, fontColour, backgroundColour);
-
-		var bitmap = new Bitmap ((int)(tableRenderer.CellSize * tableRenderer.ColumnCount), 
-		                         (int)(tableRenderer.CellSize * tableRenderer.ColumnCount),
-		                         PixelFormat.Format16bppRgb555);
-
-
-		tableRenderer.Render (bitmap);
-
-		bitmap.Save (outputfilechooserbutton.Filename, ImageFormat.Png);
 	}
 
 	protected void OnInputFontTypeGroupToggled (object sender, EventArgs e)
@@ -106,17 +90,4 @@ public partial class MainWindow: Gtk.Window
 			fromfileframe.Sensitive = true;
 		}
 	}
-	protected void InstalledFontSet (object sender, EventArgs e)
-	{
-		RefreshPreview ();
-	}
-	protected void FromFileSelectionChanged (object sender, EventArgs e)
-	{
-		RefreshPreview ();
-	}
-	protected void TransparentBackgroundToggled (object sender, EventArgs e)
-	{
-		backgroundcolorbutton.Sensitive = !transparentbackgroundcheckbutton.Active;
-	}
-
 }
