@@ -41,7 +41,6 @@ public partial class MainWindow
 	private global::Gtk.Button previewbutton;
 	private global::Gtk.Image previewimage;
 	private global::Gtk.Button generatebutton;
-	private global::Gtk.FileChooserButton outputfilechooserbutton;
 	private global::Gtk.Label GtkLabel14;
 	
 	protected virtual void Build ()
@@ -111,7 +110,7 @@ public partial class MainWindow
 		// Container child vbox1.Gtk.Box+BoxChild
 		this.installedfontsframe = new global::Gtk.Frame ();
 		this.installedfontsframe.Name = "installedfontsframe";
-		this.installedfontsframe.ShadowType = ((global::Gtk.ShadowType)(0));
+		this.installedfontsframe.ShadowType = ((global::Gtk.ShadowType)(2));
 		// Container child installedfontsframe.Gtk.Container+ContainerChild
 		this.GtkAlignment1 = new global::Gtk.Alignment (0F, 0F, 1F, 1F);
 		this.GtkAlignment1.Name = "GtkAlignment1";
@@ -135,7 +134,7 @@ public partial class MainWindow
 		this.fromfileframe = new global::Gtk.Frame ();
 		this.fromfileframe.Sensitive = false;
 		this.fromfileframe.Name = "fromfileframe";
-		this.fromfileframe.ShadowType = ((global::Gtk.ShadowType)(0));
+		this.fromfileframe.ShadowType = ((global::Gtk.ShadowType)(2));
 		// Container child fromfileframe.Gtk.Container+ContainerChild
 		this.GtkAlignment2 = new global::Gtk.Alignment (0F, 0F, 1F, 1F);
 		this.GtkAlignment2.Name = "GtkAlignment2";
@@ -343,15 +342,6 @@ public partial class MainWindow
 		w29.Position = 2;
 		w29.Expand = false;
 		w29.Fill = false;
-		// Container child vbox6.Gtk.Box+BoxChild
-		this.outputfilechooserbutton = new global::Gtk.FileChooserButton (global::Mono.Unix.Catalog.GetString ("Select a File"), ((global::Gtk.FileChooserAction)(0)));
-		this.outputfilechooserbutton.Name = "outputfilechooserbutton";
-		this.vbox6.Add (this.outputfilechooserbutton);
-		global::Gtk.Box.BoxChild w30 = ((global::Gtk.Box.BoxChild)(this.vbox6 [this.outputfilechooserbutton]));
-		w30.PackType = ((global::Gtk.PackType)(1));
-		w30.Position = 3;
-		w30.Expand = false;
-		w30.Fill = false;
 		this.GtkAlignment8.Add (this.vbox6);
 		this.frame5.Add (this.GtkAlignment8);
 		this.GtkLabel14 = new global::Gtk.Label ();
@@ -360,12 +350,12 @@ public partial class MainWindow
 		this.GtkLabel14.UseMarkup = true;
 		this.frame5.LabelWidget = this.GtkLabel14;
 		this.vbox2.Add (this.frame5);
-		global::Gtk.Box.BoxChild w33 = ((global::Gtk.Box.BoxChild)(this.vbox2 [this.frame5]));
-		w33.PackType = ((global::Gtk.PackType)(1));
-		w33.Position = 1;
+		global::Gtk.Box.BoxChild w32 = ((global::Gtk.Box.BoxChild)(this.vbox2 [this.frame5]));
+		w32.PackType = ((global::Gtk.PackType)(1));
+		w32.Position = 1;
 		this.hbox1.Add (this.vbox2);
-		global::Gtk.Box.BoxChild w34 = ((global::Gtk.Box.BoxChild)(this.hbox1 [this.vbox2]));
-		w34.Position = 1;
+		global::Gtk.Box.BoxChild w33 = ((global::Gtk.Box.BoxChild)(this.hbox1 [this.vbox2]));
+		w33.Position = 1;
 		this.Add (this.hbox1);
 		if ((this.Child != null)) {
 			this.Child.ShowAll ();
