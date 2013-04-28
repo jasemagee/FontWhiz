@@ -35,7 +35,7 @@ public partial class MainWindow
 	private global::Gtk.Label label4;
 	private global::Gtk.ColorButton fontcolorbutton;
 	private global::Gtk.Label GtkLabel11;
-	private global::Gtk.Frame frame5;
+	private global::Gtk.Frame outputframe;
 	private global::Gtk.Alignment GtkAlignment8;
 	private global::Gtk.VBox vbox6;
 	private global::Gtk.Button previewbutton;
@@ -302,10 +302,10 @@ public partial class MainWindow
 		w26.Expand = false;
 		w26.Fill = false;
 		// Container child vbox2.Gtk.Box+BoxChild
-		this.frame5 = new global::Gtk.Frame ();
-		this.frame5.Name = "frame5";
-		this.frame5.ShadowType = ((global::Gtk.ShadowType)(2));
-		// Container child frame5.Gtk.Container+ContainerChild
+		this.outputframe = new global::Gtk.Frame ();
+		this.outputframe.Name = "outputframe";
+		this.outputframe.ShadowType = ((global::Gtk.ShadowType)(2));
+		// Container child outputframe.Gtk.Container+ContainerChild
 		this.GtkAlignment8 = new global::Gtk.Alignment (0F, 0F, 1F, 1F);
 		this.GtkAlignment8.Name = "GtkAlignment8";
 		this.GtkAlignment8.LeftPadding = ((uint)(12));
@@ -343,14 +343,14 @@ public partial class MainWindow
 		w29.Expand = false;
 		w29.Fill = false;
 		this.GtkAlignment8.Add (this.vbox6);
-		this.frame5.Add (this.GtkAlignment8);
+		this.outputframe.Add (this.GtkAlignment8);
 		this.GtkLabel14 = new global::Gtk.Label ();
 		this.GtkLabel14.Name = "GtkLabel14";
 		this.GtkLabel14.LabelProp = global::Mono.Unix.Catalog.GetString ("<b>Output</b>");
 		this.GtkLabel14.UseMarkup = true;
-		this.frame5.LabelWidget = this.GtkLabel14;
-		this.vbox2.Add (this.frame5);
-		global::Gtk.Box.BoxChild w32 = ((global::Gtk.Box.BoxChild)(this.vbox2 [this.frame5]));
+		this.outputframe.LabelWidget = this.GtkLabel14;
+		this.vbox2.Add (this.outputframe);
+		global::Gtk.Box.BoxChild w32 = ((global::Gtk.Box.BoxChild)(this.vbox2 [this.outputframe]));
 		w32.PackType = ((global::Gtk.PackType)(1));
 		w32.Position = 1;
 		this.hbox1.Add (this.vbox2);

@@ -74,8 +74,9 @@
     <Compile Include="gtk-gui\MainWindow.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="AssemblyInfo.cs" />
-    <Compile Include="FontTableRenderer.cs" />
     <Compile Include="ColourConverter.cs" />
+    <Compile Include="FontRendererParams.cs" />
+    <Compile Include="FontRenderer.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

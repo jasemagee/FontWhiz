@@ -368,7 +368,7 @@
               </packing>
             </child>
             <child>
-              <widget class="Gtk.Frame" id="frame5">
+              <widget class="Gtk.Frame" id="outputframe">
                 <property name="MemberName" />
                 <property name="ShadowType">Out</property>
                 <child>

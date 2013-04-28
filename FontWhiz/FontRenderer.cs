@@ -6,19 +6,9 @@ using System.Diagnostics;
 
 namespace FontWhiz
 {
-	public class FontTableRenderer
+	public class FontRenderer
 	{
-		public string FontName {
-			get;
-			set;
-		}
-
-		public int FontSize {
-			get;
-			set;
-		}
-
-		public bool FontAntiAlias {
+		public FontRendererParams FontRendererParams {
 			get;
 			set;
 		}
@@ -38,28 +28,14 @@ namespace FontWhiz
 			set;
 		}
 
-		public Color FontColour {
-			get;
-			set;
-		}
-
-		public Color BackgroundColour {
-			get;
-			set;
-		}
-
 		public float CellSize {
 			get;
 			private set;
 		}
 
-		public FontTableRenderer (string fontName, int fontSize, bool fontAntiAlias, Color fontColour, Color backgroundColour)
+		public FontRenderer (FontRendererParams fontRendererParams)
 		{
-			FontName = fontName;
-			FontSize = fontSize;	
-			FontAntiAlias = fontAntiAlias;
-			FontColour = fontColour;
-			BackgroundColour = backgroundColour;
+			FontRendererParams = fontRendererParams;
 
 			AsciiSetSize = 256;
 			ColumnCount = 16;
@@ -102,7 +78,7 @@ namespace FontWhiz
 
 		private void CalculateCellSize (DirectoryInfo directory)
 		{
-			var defaultArgs = string.Format ("-gravity center +antialias -font {0} -pointsize {1}", FontName, FontSize);
+			var defaultArgs = string.Format ("-gravity center +antialias -font {0} -pointsize {1}", FontRendererParams.Font, FontRendererParams.FontSize);
 
 			foreach (char c in Chars) {
 				// Only bother to make files for actual visible characters
@@ -132,14 +108,15 @@ namespace FontWhiz
 
 			CalculateCellSize (outDirectory);
 
-			string background = BackgroundColour.ToImageMagickRgb ();
+			string background = FontRendererParams.BackgroundColour.ToImageMagickRgb ();
 
 			// TODO: Background would be more consistent but it doesn't want to work?
 			ProcessStartAndWaitForExit ("convert", string.Format ("-size {0}x{0} xc:{1} work/blank.png", CellSize, background));
 
 			var defaultArgs = string.Format (
 				"-gravity center +antialias -size {0}x{0} -background {1} -fill '{2}' -font {3} -pointsize {4}",
-				CellSize, background, FontColour.ToImageMagickRgb (), FontName, FontSize);
+				CellSize, background, FontRendererParams.FontColour.ToImageMagickRgb (), 
+				FontRendererParams.Font, FontRendererParams.FontSize);
 
 			foreach (char c in Chars) {
 				// Only bother to make files for actual visible characters
