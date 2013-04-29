@@ -67,6 +67,9 @@ public partial class MainWindow: Gtk.Window
 		// Do this on the main thread!
 		Gtk.Application.Invoke (delegate {
 			previewimage.File = preview;
+			labelWidth.LabelProp = previewimage.Pixbuf.Width.ToString ();
+			labelHeight.LabelProp = previewimage.Pixbuf.Height.ToString ();
+			labelCellSize.LabelProp = tableRenderer.CellSize.ToString ();
 			outputframe.Sensitive = true;
 			this.GdkWindow.Cursor = new Gdk.Cursor (Gdk.CursorType.Arrow);
 		}
