@@ -24,11 +24,6 @@ public partial class MainWindow: Gtk.Window
 			(sender, e) => PerformRefreshPreview ();
 
 		this.KeyReleaseEvent += HandleKeyReleaseEvent;
-
-		foreach (var font in FontRenderer.GetImageMagickFonts()) 
-			installedfontscombobox.AppendText (font);
-
-		installedfontscombobox.Active = 0;
 	}
 
 	private void PerformRefreshPreview ()
@@ -140,7 +135,12 @@ public partial class MainWindow: Gtk.Window
 			messageDialog.Run ();
 			messageDialog.Destroy ();
 			Application.Quit ();
-		} 	
+		} else {
+			foreach (var font in FontRenderer.GetImageMagickFonts()) 
+			installedfontscombobox.AppendText (font);
+		
+		installedfontscombobox.Active = 0;
+		}
 	}
 
 	protected void OnInputFontTypeGroupToggled (object sender, EventArgs e)
