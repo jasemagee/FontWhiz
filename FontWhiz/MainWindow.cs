@@ -12,6 +12,8 @@ public partial class MainWindow: Gtk.Window
 		Build ();
 
 		/// GUI designer appears to hate me and keeps forgetting these
+		EnterNotifyEvent += HandleEnterNotifyEvent;
+
 		installedfontsradiobutton.Toggled += OnInputFontTypeGroupToggled;
 		generatebutton.Released += OnGenerateButtonReleased;
 
@@ -50,11 +52,12 @@ public partial class MainWindow: Gtk.Window
 			backgroundColour = Color.Transparent;
 
 		Thread thread = new Thread (new ParameterizedThreadStart (RefreshPreview));
-		thread.Start (new FontRendererParams (font, 
-		                                        sizespinbutton.ValueAsInt, 
-		                                        fontcolorbutton.Color.ToDotNetColour (), 
-		                                        backgroundColour,
-		                                        antialiasingcheckbutton.Active)
+		thread.Start (new FontRendererParams (font, 		                                        
+		                                      sizespinbutton.ValueAsInt, 		                                        
+		                                      fontcolorbutton.Color.ToDotNetColour (),                                        
+		                                      backgroundColour,
+		                                      antialiasingcheckbutton.Active,
+		                                      true)
 		);
 	}
 
@@ -120,6 +123,24 @@ public partial class MainWindow: Gtk.Window
 		}
 
 		fileChooserDialog.Destroy ();
+	}
+
+	void HandleEnterNotifyEvent (object o, EnterNotifyEventArgs args)
+	{	
+		bool installed = FontRenderer.IsImageMagickInstalled ();
+
+		if (!installed) {
+			var messageDialog = new MessageDialog (this, DialogFlags.Modal,
+		                                       MessageType.Error,
+		                                       ButtonsType.Close,
+		                                       "You must have ImageMagick installed in " + 
+				"order to use this software. See the FAQ at <a href=\"http://fontwhiz.com\">http://fontwhiz.com</a>"
+			);
+
+			messageDialog.Run ();
+			messageDialog.Destroy ();
+			Application.Quit ();
+		} 	
 	}
 
 	protected void OnInputFontTypeGroupToggled (object sender, EventArgs e)

@@ -18,11 +18,6 @@ namespace FontWhiz
 			set;
 		}
 
-		public int ColumnCount {
-			get;
-			set;
-		}
-
 		public char[] Chars {
 			get;
 			set;
@@ -38,7 +33,6 @@ namespace FontWhiz
 			FontRendererParams = fontRendererParams;
 
 			AsciiSetSize = 256;
-			ColumnCount = 16;
 
 			Chars = new char[AsciiSetSize];
 			for (int i = 0; i < AsciiSetSize; i++) {
@@ -51,34 +45,9 @@ namespace FontWhiz
 			}
 		}
 
-		private void ProcessStartAndWaitForExit (string filename, string args)
-		{
-			using (Process p = new Process ()) {
-				p.StartInfo.FileName = filename;
-				p.StartInfo.Arguments = args;
-				p.StartInfo.UseShellExecute = false;
-				p.Start ();
-				p.WaitForExit ();
-			}
-		}
-
-		private string GetImageMagickSafeChar (char c)
-		{
-			string outputChar = char.ToString (c);
-
-			if (outputChar.Equals ("'"))
-				outputChar += "\'";
-
-			if (outputChar.Equals ("\\"))
-				outputChar += "\\";
-
-			return outputChar;
-
-		}
-
 		private void CalculateCellSize (DirectoryInfo directory)
 		{
-			var defaultArgs = string.Format ("-gravity center +antialias -font {0} -pointsize {1}", FontRendererParams.Font, FontRendererParams.FontSize);
+			var defaultArgs = GetGravSizeFontArgs ();
 
 			foreach (char c in Chars) {
 				// Only bother to make files for actual visible characters
@@ -106,17 +75,22 @@ namespace FontWhiz
 
 			DirectoryInfo outDirectory = Directory.CreateDirectory ("work");
 
+			RenderFixed (outDirectory);
+			return "work/output.png";
+		}
+
+		private void RenderFixed (DirectoryInfo outDirectory)
+		{
 			CalculateCellSize (outDirectory);
 
 			string background = FontRendererParams.BackgroundColour.ToImageMagickRgb ();
 
 			// TODO: Background would be more consistent but it doesn't want to work?
-			ProcessStartAndWaitForExit ("convert", string.Format ("-size {0}x{0} xc:{1} work/blank.png", CellSize, background));
+			ProcessStartAndWaitForExit ("convert", string.Format ("-size {0}x{0} xc:{1} work/blank.png", 
+			                                                      CellSize, background)
+			);
 
-			var defaultArgs = string.Format (
-				"-gravity center +antialias -size {0}x{0} -background {1} -fill '{2}' -font {3} -pointsize {4}",
-				CellSize, background, FontRendererParams.FontColour.ToImageMagickRgb (), 
-				FontRendererParams.Font, FontRendererParams.FontSize);
+			var defaultArgs = GetAllArgs ();
 
 			foreach (char c in Chars) {
 				// Only bother to make files for actual visible characters
@@ -138,7 +112,6 @@ namespace FontWhiz
 					filenames [i] = matches [0].FullName;
 			}
 
-			//int border = ShowGrid ? 1 : 0;
 			var joinedFilenames = string.Join (" ", filenames);
 			var montageArgs = string.Format (
 				"{0} +set label '' -geometry +0+0 -background none -bordercolor none work/output.png",
@@ -146,7 +119,55 @@ namespace FontWhiz
 
 			ProcessStartAndWaitForExit ("montage", montageArgs);
 
-			return "work/output.png";
+		}
+
+		private string GetGravSizeFontArgs ()
+		{
+			var defaultArgs = string.Format ("-gravity center -font {0} -pointsize {1}", 
+			                                 FontRendererParams.Font, FontRendererParams.FontSize);
+
+			if (!FontRendererParams.AntiAlias)
+				defaultArgs += " +antialias";
+
+			return defaultArgs;
+		}
+
+		private string GetAllArgs ()
+		{
+			string background = FontRendererParams.BackgroundColour.ToImageMagickRgb ();
+
+			var defaultArgs = GetGravSizeFontArgs ();
+
+			defaultArgs += string.Format (
+				" -size {0}x{0} -background {1} -fill '{2}'",
+				CellSize, background, FontRendererParams.FontColour.ToImageMagickRgb ());
+
+			return defaultArgs;
+		}
+
+		private void ProcessStartAndWaitForExit (string filename, string args)
+		{
+			using (Process p = new Process ()) {
+				p.StartInfo.FileName = filename;
+				p.StartInfo.Arguments = args;
+				p.StartInfo.UseShellExecute = false;
+				p.Start ();
+				p.WaitForExit ();
+			}
+		}
+
+		private string GetImageMagickSafeChar (char c)
+		{
+			string outputChar = char.ToString (c);
+
+			if (outputChar.Equals ("'"))
+				outputChar += "\'";
+
+			if (outputChar.Equals ("\\"))
+				outputChar += "\\";
+
+			return outputChar;
+
 		}
 
 		public static List<string> GetImageMagickFonts ()
@@ -174,6 +195,21 @@ namespace FontWhiz
 			}
 
 			return fonts;
+		}
+
+		public static bool IsImageMagickInstalled ()
+		{
+			var p = new Process ();
+			p.StartInfo.UseShellExecute = false;
+			p.StartInfo.RedirectStandardOutput = true;
+			p.StartInfo.FileName = "convert";
+			p.StartInfo.Arguments = "--version";
+			p.Start ();
+
+			string output = p.StandardOutput.ReadToEnd ();
+			p.WaitForExit ();
+
+			return output.ToLower ().Contains ("imagemagick");
 		}
 
 	}

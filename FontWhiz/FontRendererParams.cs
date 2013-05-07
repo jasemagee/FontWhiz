@@ -29,20 +29,19 @@ namespace FontWhiz
 			set;
 		}
 
-		public bool Pack {
+		public bool FixedWidth {
 			get;
 			set;
 		}
 
-		public FontRendererParams (string font, int fontSize, Color fontColour, Color backgroundColour, bool antiAlias)
+		public FontRendererParams (string font, int fontSize, Color fontColour, Color backgroundColour, bool antiAlias, bool fixedWidth)
 		{
 			Font = font;
 			FontSize = fontSize;
 			FontColour = fontColour;
 			BackgroundColour = backgroundColour;
 			AntiAlias = antiAlias;
-			Pack = false;
-			
+			FixedWidth = fixedWidth;	
 		}
 	}
 }
