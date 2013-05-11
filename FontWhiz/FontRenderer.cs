@@ -151,6 +151,10 @@ namespace FontWhiz
 				p.StartInfo.FileName = filename;
 				p.StartInfo.Arguments = args;
 				p.StartInfo.UseShellExecute = false;
+				p.StartInfo.RedirectStandardOutput = true;
+				p.StartInfo.RedirectStandardError = true;
+				p.StartInfo.CreateNoWindow = true;
+				p.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
 				p.Start ();
 				p.WaitForExit ();
 			}
@@ -172,15 +176,20 @@ namespace FontWhiz
 
 		public static List<string> GetImageMagickFonts ()
 		{
-			var p = new Process ();
-			p.StartInfo.UseShellExecute = false;
-			p.StartInfo.RedirectStandardOutput = true;
-			p.StartInfo.FileName = "convert";
-			p.StartInfo.Arguments = "-list font";
-			p.Start ();
+			string output = string.Empty;
+			using (Process p = new Process ()) {
+				p.StartInfo.UseShellExecute = false;
+				p.StartInfo.RedirectStandardOutput = true;
+				p.StartInfo.RedirectStandardError = true;
+				p.StartInfo.CreateNoWindow = true;
+				p.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+				p.StartInfo.FileName = "convert";
+				p.StartInfo.Arguments = "-list font";
+				p.Start ();
 
-			string output = p.StandardOutput.ReadToEnd ();
-			p.WaitForExit ();
+				output = p.StandardOutput.ReadToEnd ();
+				p.WaitForExit ();
+			}
 
 			const string IMAGE_MAGICK_FONT_DEF = "Font: ";
 
@@ -195,21 +204,30 @@ namespace FontWhiz
 			}
 
 			return fonts;
+
 		}
 
 		public static bool IsImageMagickInstalled ()
 		{
-			var p = new Process ();
-			p.StartInfo.UseShellExecute = false;
-			p.StartInfo.RedirectStandardOutput = true;
-			p.StartInfo.FileName = "convert";
-			p.StartInfo.Arguments = "--version";
-			p.Start ();
+			string output = string.Empty;
+			using (Process p = new Process ()) {
+				p.StartInfo.UseShellExecute = false;
+				p.StartInfo.RedirectStandardOutput = true;
+				p.StartInfo.RedirectStandardError = true;
+				p.StartInfo.CreateNoWindow = true;
+				p.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+				p.StartInfo.FileName = "convert";
+				p.StartInfo.Arguments = "--version";
+				p.Start ();
 
-			string output = p.StandardOutput.ReadToEnd ();
-			p.WaitForExit ();
+				output = p.StandardOutput.ReadToEnd ();
+				p.WaitForExit ();
+				
+			}
 
 			return output.ToLower ().Contains ("imagemagick");
+
+
 		}
 
 	}
