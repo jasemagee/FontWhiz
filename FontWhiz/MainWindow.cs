@@ -11,8 +11,10 @@ public partial class MainWindow: Gtk.Window
 	{
 		Build ();
 
-		/// GUI designer appears to hate me and keeps forgetting these
-		EnterNotifyEvent += HandleEnterNotifyEvent;
+		foreach (var font in FontRenderer.GetImageMagickFonts()) 
+			installedfontscombobox.AppendText (font);
+
+		installedfontscombobox.Active = 0;
 
 		installedfontsradiobutton.Toggled += OnInputFontTypeGroupToggled;
 		generatebutton.Released += OnGenerateButtonReleased;
@@ -24,6 +26,7 @@ public partial class MainWindow: Gtk.Window
 			(sender, e) => PerformRefreshPreview ();
 
 		this.KeyReleaseEvent += HandleKeyReleaseEvent;
+
 	}
 
 	private void PerformRefreshPreview ()
@@ -118,29 +121,6 @@ public partial class MainWindow: Gtk.Window
 		}
 
 		fileChooserDialog.Destroy ();
-	}
-
-	void HandleEnterNotifyEvent (object o, EnterNotifyEventArgs args)
-	{	
-		bool installed = FontRenderer.IsImageMagickInstalled ();
-
-		if (!installed) {
-			var messageDialog = new MessageDialog (this, DialogFlags.Modal,
-		                                       MessageType.Error,
-		                                       ButtonsType.Close,
-		                                       "You must have ImageMagick installed in " + 
-				"order to use this software. See the FAQ at <a href=\"http://fontwhiz.com\">http://fontwhiz.com</a>"
-			);
-
-			messageDialog.Run ();
-			messageDialog.Destroy ();
-			Application.Quit ();
-		} else {
-			foreach (var font in FontRenderer.GetImageMagickFonts()) 
-			installedfontscombobox.AppendText (font);
-		
-		installedfontscombobox.Active = 0;
-		}
 	}
 
 	protected void OnInputFontTypeGroupToggled (object sender, EventArgs e)
