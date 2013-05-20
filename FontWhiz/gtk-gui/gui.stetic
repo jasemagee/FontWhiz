@@ -583,6 +583,7 @@
                         <child>
                           <widget class="Gtk.Button" id="generatebutton">
                             <property name="MemberName" />
+                            <property name="Sensitive">False</property>
                             <property name="CanFocus">True</property>
                             <property name="Type">TextOnly</property>
                             <property name="Label" translatable="yes">Generate</property>

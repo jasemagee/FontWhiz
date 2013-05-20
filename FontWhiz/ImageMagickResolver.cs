@@ -7,10 +7,20 @@ namespace FontWhiz
 {
 	public class ImageMagickResolver
 	{
+		private static UserSettings mResolvedSettings = null;
+		public static UserSettings ResolvedSettings {
+			get {
+				if (!Resolved ())
+					throw new InvalidProgramException ("Settings must be resolved prior to use");
+
+				return mResolvedSettings;	
+			}
+		}
 		public static bool Resolved ()
 		{
 			UserSettings defaultUserSettings = GetDefaultUserSettingsForPlatform ();
 			UserSettings userSettings = UserSettings.Load (defaultUserSettings);
+			mResolvedSettings = userSettings;
 			return IsUserSettingsValid (userSettings);
 		}
 

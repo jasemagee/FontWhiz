@@ -24,7 +24,7 @@ namespace FontWhiz
 			MontageLocation = montageLocation;
 		}
 
-		private static string AppUserSettingsFile {
+		public static string AppUserSettingsFile {
 			get {
 				return Path.Combine (AppDataFolder, Path.ChangeExtension (AppName, "xml"));
 			}
@@ -49,7 +49,7 @@ namespace FontWhiz
 		}
 
 
-		public static void Write (string filename, UserSettings userSettings)
+		private static void Write (string filename, UserSettings userSettings)
 		{
 			DataContractSerializer s = new DataContractSerializer (typeof(UserSettings));
 			using (FileStream fs = File.Open(filename, FileMode.Create)) {

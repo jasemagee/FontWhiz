@@ -479,6 +479,7 @@ public partial class MainWindow
 		w41.Position = 1;
 		// Container child vbox6.Gtk.Box+BoxChild
 		this.generatebutton = new global::Gtk.Button ();
+		this.generatebutton.Sensitive = false;
 		this.generatebutton.CanFocus = true;
 		this.generatebutton.Name = "generatebutton";
 		this.generatebutton.UseUnderline = true;

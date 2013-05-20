@@ -57,7 +57,7 @@ namespace FontWhiz
 				string outputChar = GetImageMagickSafeChar (c);
 
 				string args = string.Format ("{0} label:'{1}' work/{2}.png", defaultArgs, outputChar, (int)c);	
-				ProcessStartAndWaitForExit ("convert", args);
+				ProcessStartAndWaitForExit (ImageMagickResolver.ResolvedSettings.ConvertLocation, args);
 			}
 
 			foreach (var file in directory.GetFiles()) {
@@ -86,7 +86,8 @@ namespace FontWhiz
 			string background = FontRendererParams.BackgroundColour.ToImageMagickRgb ();
 
 			// TODO: Background would be more consistent but it doesn't want to work?
-			ProcessStartAndWaitForExit ("convert", string.Format ("-size {0}x{0} xc:{1} work/blank.png", 
+			ProcessStartAndWaitForExit (ImageMagickResolver.ResolvedSettings.ConvertLocation, 
+			                            string.Format ("-size {0}x{0} xc:{1} work/blank.png", 
 			                                                      CellSize, background)
 			);
 
@@ -100,7 +101,7 @@ namespace FontWhiz
 				string outputChar = GetImageMagickSafeChar (c);
 
 				var args = string.Format ("{0} label:'{1}' work/{2}.png", defaultArgs, outputChar, (int)c);
-				ProcessStartAndWaitForExit ("convert", args);
+				ProcessStartAndWaitForExit (ImageMagickResolver.ResolvedSettings.ConvertLocation, args);
 			}
 
 
@@ -117,7 +118,7 @@ namespace FontWhiz
 				"{0} +set label '' -geometry +0+0 -background none -bordercolor none work/output.png",
 				joinedFilenames, CellSize, background);
 
-			ProcessStartAndWaitForExit ("montage", montageArgs);
+			ProcessStartAndWaitForExit (ImageMagickResolver.ResolvedSettings.MontageLocation, montageArgs);
 
 		}
 
@@ -183,7 +184,7 @@ namespace FontWhiz
 				p.StartInfo.RedirectStandardError = true;
 				p.StartInfo.CreateNoWindow = true;
 				p.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-				p.StartInfo.FileName = "convert";
+				p.StartInfo.FileName = ImageMagickResolver.ResolvedSettings.ConvertLocation;
 				p.StartInfo.Arguments = "-list font";
 				p.Start ();
 
