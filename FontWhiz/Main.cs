@@ -8,12 +8,12 @@ namespace FontWhiz
 		{
 			Application.Init ();
 
-			if (!FontRenderer.IsImageMagickInstalled ()) {
+			if (!ImageMagickResolver.Resolve ()) {
 				var messageDialog = new MessageDialog (null, DialogFlags.Modal, 
 				                                       MessageType.Error, ButtonsType.Close,
 				                                      "You must have ImageMagick installed in " + 
-				                                       "order to use this software. See the FAQ " +
-				                                       "at <a href=\"http://fontwhiz.com\">http://fontwhiz.com</a>"
+					"order to use this software. See the FAQ " +
+					"at <a href=\"http://fontwhiz.com\">http://fontwhiz.com</a>"
 				);
 
 				messageDialog.WindowPosition = WindowPosition.Center;

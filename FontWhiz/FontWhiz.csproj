@@ -62,6 +62,7 @@
       <Private>False</Private>
       <Package>gtk-dotnet-2.0</Package>
     </Reference>
+    <Reference Include="System.Runtime.Serialization" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="gtk-gui\gui.stetic">
@@ -77,11 +78,14 @@
     <Compile Include="ColourConverter.cs" />
     <Compile Include="FontRendererParams.cs" />
     <Compile Include="FontRenderer.cs" />
+    <Compile Include="ImageMagickResolver.cs" />
+    <Compile Include="UserSettings.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <Content Include="icon.png">
       <DeployService-UseProjectRelativePath>true</DeployService-UseProjectRelativePath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
 </Project>
