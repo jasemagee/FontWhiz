@@ -30,17 +30,6 @@ namespace FontWhiz
 			                     colour.G,
 			                     colour.B);
 		}
-
-//		public static string ToImageMagickRgb (this Color colour)
-//		{
-//			if (colour == Color.Transparent)
-//				return "transparent";
-//			else 
-//				return string.Format ("\'rgb({0},{1},{2})\'",
-//				                      colour.R,
-//				                      colour.G,
-//				                      colour.B);
-//		}
 	}
 }
 

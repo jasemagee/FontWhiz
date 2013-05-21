@@ -50,10 +50,6 @@ namespace FontWhiz
 			var defaultArgs = GetGravSizeFontArgs ();
 
 			foreach (char c in Chars) {
-				// Only bother to make files for actual visible characters
-				if (char.IsControl (c))
-					continue;
-
 				string outputChar = GetImageMagickSafeChar (c);
 
 				string args = string.Format ("{0} label:{1} work/{2}.png", defaultArgs, outputChar, (int)c);	
@@ -61,12 +57,11 @@ namespace FontWhiz
 			}
 
 			foreach (var file in directory.GetFiles()) {
-				using(Image image = Image.FromFile (file.FullName)) {
-				CellSize = Math.Max (CellSize, image.Width);
-				CellSize = Math.Max (CellSize, image.Height);
+				using (Image image = Image.FromFile (file.FullName)) {
+					CellSize = Math.Max (CellSize, image.Width);
+					CellSize = Math.Max (CellSize, image.Height);
 				}
 				file.Delete ();
-
 			}
 		}
 
