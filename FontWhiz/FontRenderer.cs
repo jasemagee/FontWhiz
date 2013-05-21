@@ -61,10 +61,12 @@ namespace FontWhiz
 			}
 
 			foreach (var file in directory.GetFiles()) {
-				Image image = Image.FromFile (file.FullName);
+				using(Image image = Image.FromFile (file.FullName)) {
 				CellSize = Math.Max (CellSize, image.Width);
 				CellSize = Math.Max (CellSize, image.Height);
+				}
 				file.Delete ();
+
 			}
 		}
 
@@ -118,6 +120,9 @@ namespace FontWhiz
 				"{0} +set label '' -geometry +0+0 -background none -bordercolor none work/output.png",
 				joinedFilenames, CellSize, background);
 
+			GC.Collect ();
+			GC.WaitForPendingFinalizers ();
+
 			ProcessStartAndWaitForExit (ImageMagickResolver.ResolvedSettings.MontageLocation, montageArgs);
 
 		}
@@ -135,13 +140,14 @@ namespace FontWhiz
 
 		private string GetAllArgs ()
 		{
+			string foreground = FontRendererParams.FontColour.ToImageMagickRgb ();
 			string background = FontRendererParams.BackgroundColour.ToImageMagickRgb ();
 
 			var defaultArgs = GetGravSizeFontArgs ();
 
 			defaultArgs += string.Format (
 				" -size {0}x{0} -background {1} -fill {2}",
-				CellSize, background, FontRendererParams.FontColour.ToImageMagickRgb ());
+				CellSize, background, foreground);
 
 			return defaultArgs;
 		}
