@@ -20,8 +20,14 @@ namespace FontWhiz
 		{
 			UserSettings defaultUserSettings = GetDefaultUserSettingsForPlatform ();
 			UserSettings userSettings = UserSettings.Load (defaultUserSettings);
-			mResolvedSettings = userSettings;
-			return IsUserSettingsValid (userSettings);
+
+			bool valid =  IsUserSettingsValid (userSettings);
+
+			if (valid)
+				mResolvedSettings = userSettings;
+			else
+				File.Delete (UserSettings.AppUserSettingsFile);
+			return valid;
 		}
 
 		private static UserSettings GetDefaultUserSettingsForPlatform ()
@@ -37,10 +43,18 @@ namespace FontWhiz
 				expectedMontageName = "montage";
 			} else {
 				string programFiles = Environment.GetFolderPath (Environment.SpecialFolder.ProgramFilesX86);
-				expectedLocation = Path.Combine (programFiles, "ImageMagick");
+				string imageMagickFolder = "C:\\Program Files (x86)\\ImageMagick\\";
+
+				foreach (var directory in Directory.GetDirectories(programFiles)) {
+					if (directory.Contains ("ImageMagick"))
+						imageMagickFolder = directory;
+				}
+
+				expectedLocation =imageMagickFolder;
 				expectedConvertName = "convert.exe";
 				expectedMontageName = "montage.exe";
 			}
+
 
 			return new UserSettings (
 				Path.Combine (expectedLocation, expectedConvertName),
