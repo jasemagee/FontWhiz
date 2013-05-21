@@ -56,7 +56,7 @@ namespace FontWhiz
 
 				string outputChar = GetImageMagickSafeChar (c);
 
-				string args = string.Format ("{0} label:'{1}' work/{2}.png", defaultArgs, outputChar, (int)c);	
+				string args = string.Format ("{0} label:{1} work/{2}.png", defaultArgs, outputChar, (int)c);	
 				ProcessStartAndWaitForExit (ImageMagickResolver.ResolvedSettings.ConvertLocation, args);
 			}
 
@@ -100,7 +100,7 @@ namespace FontWhiz
 
 				string outputChar = GetImageMagickSafeChar (c);
 
-				var args = string.Format ("{0} label:'{1}' work/{2}.png", defaultArgs, outputChar, (int)c);
+				var args = string.Format ("{0} label:{1} work/{2}.png", defaultArgs, outputChar, (int)c);
 				ProcessStartAndWaitForExit (ImageMagickResolver.ResolvedSettings.ConvertLocation, args);
 			}
 
@@ -140,7 +140,7 @@ namespace FontWhiz
 			var defaultArgs = GetGravSizeFontArgs ();
 
 			defaultArgs += string.Format (
-				" -size {0}x{0} -background {1} -fill '{2}'",
+				" -size {0}x{0} -background {1} -fill {2}",
 				CellSize, background, FontRendererParams.FontColour.ToImageMagickRgb ());
 
 			return defaultArgs;
@@ -170,6 +170,9 @@ namespace FontWhiz
 
 			if (outputChar.Equals ("\\"))
 				outputChar += "\\";
+
+			if (outputChar.Equals ("\""))
+				outputChar = "\\\"";
 
 			return outputChar;
 
