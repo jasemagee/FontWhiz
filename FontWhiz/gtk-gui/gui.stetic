@@ -586,7 +586,7 @@
                             <property name="Sensitive">False</property>
                             <property name="CanFocus">True</property>
                             <property name="Type">TextOnly</property>
-                            <property name="Label" translatable="yes">Generate</property>
+                            <property name="Label" translatable="yes">Save</property>
                             <property name="UseUnderline">True</property>
                           </widget>
                           <packing>

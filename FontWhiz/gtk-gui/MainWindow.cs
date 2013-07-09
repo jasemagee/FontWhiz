@@ -483,7 +483,7 @@ public partial class MainWindow
 		this.generatebutton.CanFocus = true;
 		this.generatebutton.Name = "generatebutton";
 		this.generatebutton.UseUnderline = true;
-		this.generatebutton.Label = global::Mono.Unix.Catalog.GetString ("Generate");
+		this.generatebutton.Label = global::Mono.Unix.Catalog.GetString ("Save");
 		this.vbox6.Add (this.generatebutton);
 		global::Gtk.Box.BoxChild w42 = ((global::Gtk.Box.BoxChild)(this.vbox6 [this.generatebutton]));
 		w42.PackType = ((global::Gtk.PackType)(1));
